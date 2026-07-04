@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>مدونة المقالات</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>مدونة المقالات</h1>
+      <form id="article-form">
+        <input id="title" name="title" placeholder="عنوان المقال" required />
+        <textarea id="description" name="description" placeholder="وصف المقال" rows="4" required></textarea>
+        <button type="submit">إضافة مقال</button>
+      </form>
+
+      <p id="message"></p>
+      <div id="articles"></div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
