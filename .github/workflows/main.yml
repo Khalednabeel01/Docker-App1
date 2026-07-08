@@ -29,22 +29,42 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push backend image
+      - name: Build backend image for pull request
+        if: github.event_name == 'pull_request'
         uses: docker/build-push-action@v6
         with:
           context: ./backend
           file: ./backend/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push: false
+          tags: app-backend:pr-test
+
+      - name: Build and push backend image
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/app-backend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/app-backend:${{ github.sha }}
 
-      - name: Build and push frontend image
+      - name: Build frontend image for pull request
+        if: github.event_name == 'pull_request'
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push: false
+          tags: app-frontend:pr-test
+
+      - name: Build and push frontend image
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/app-frontend:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/app-frontend:${{ github.sha }}
