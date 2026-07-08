@@ -1,15 +1,19 @@
-# Articles Blog with Docker Compose
+# Dockerized Articles App
 
-This project is a simple articles management application built with a Node.js backend, a static frontend, a MySQL database, and several monitoring and observability services. It is fully containerized with Docker Compose for easy local development and deployment.
+This project is a full-stack articles management application containerized with Docker Compose. It includes a Node.js backend, a static frontend, a MySQL database, and an observability stack with Prometheus, Grafana, Loki, and Promtail.
+
+## Overview
+
+The application allows users to create and view articles through a simple web interface. The frontend communicates with the backend through Nginx, and the backend stores article data in MySQL.
 
 ## Features
 
-- Create and view articles through a simple web interface
+- Create and view articles from a simple UI
 - REST API for article management
-- MySQL database persistence
-- Nginx as the main entry point
-- Monitoring with Prometheus, Grafana, and cAdvisor
-- Container health checks and restart policies
+- MySQL persistence for application data
+- Reverse proxy with Nginx
+- Monitoring and logging with Prometheus, Grafana, Loki, and Promtail
+- Docker-based setup for local development and deployment
 
 ## Project Structure
 
@@ -26,9 +30,10 @@ This project is a simple articles management application built with a Node.js ba
 │   ├── nginx.conf
 │   └── styles.css
 ├── grafana/
-│   └── provisioning/
-│       └── datasources/
-│           └── datasource.yml
+│   └── provisioning/datasources/datasource.yml
+├── monitoring/
+│   ├── loki-config.yml
+│   └── promtail-config.yml
 ├── mysql/
 │   └── init.sql
 ├── nginx/
@@ -41,20 +46,21 @@ This project is a simple articles management application built with a Node.js ba
 
 ## Architecture
 
-The application consists of the following services:
+The system is composed of the following services:
 
 - Frontend: serves the web UI using Nginx
-- Backend: Node.js/Express API
+- Backend: Node.js API built with Express
 - Database: MySQL 8.0
-- Nginx: routes requests between frontend and backend
+- Nginx: routes requests between the frontend and backend
 - Prometheus: collects metrics
-- Grafana: visualizes metrics
+- Grafana: visualizes metrics and dashboards
+- Loki/Promtail: collect and ship logs
 - cAdvisor: monitors container performance
-- Node Exporter: exposes system metrics
+- Node Exporter: exposes host and container system metrics
 
 ## Prerequisites
 
-Make sure the following are installed on your machine:
+Make sure the following tools are installed:
 
 - Docker
 - Docker Compose
@@ -68,13 +74,13 @@ git clone <repository-url>
 cd app
 ```
 
-2. Start all services:
+2. Build and start all services:
 
 ```bash
 docker compose up --build -d
 ```
 
-3. Check running containers:
+3. Check the running containers:
 
 ```bash
 docker compose ps
@@ -82,7 +88,7 @@ docker compose ps
 
 ## Access the Application
 
-Once the containers are running, you can access the app at:
+Once the containers are running, you can access:
 
 - Frontend UI: http://localhost
 - Backend API: http://localhost/api
@@ -91,6 +97,7 @@ Once the containers are running, you can access the app at:
 - Prometheus: http://localhost:9090
 - cAdvisor: http://localhost:8082
 - Node Exporter: http://localhost:9100
+- Loki: http://localhost:3100
 
 ## API Endpoints
 
@@ -98,13 +105,13 @@ Once the containers are running, you can access the app at:
 
 - GET /api/health
 
-Returns the current health status of the backend service.
+Returns the health status of the backend service.
 
 ### Get All Articles
 
 - GET /api/articles
 
-Returns a list of articles ordered by creation date in descending order.
+Returns all articles ordered by creation date descending.
 
 ### Create an Article
 
@@ -121,24 +128,24 @@ Request body:
 
 ## Database
 
-The MySQL database is initialized automatically using the SQL script in [mysql/init.sql](mysql/init.sql). It creates the articles table with the following structure:
+The MySQL database is initialized automatically using [mysql/init.sql](mysql/init.sql). It creates an articles table with the following columns:
 
 - id
 - title
 - description
 - created_at
 
-## Monitoring
+## Monitoring and Logging
 
 The monitoring stack is configured as follows:
 
 - Prometheus scrapes metrics from cAdvisor and Node Exporter
-- Grafana uses Prometheus as its datasource
-- Grafana is provisioned with a datasource configuration from [grafana/provisioning/datasources/datasource.yml](grafana/provisioning/datasources/datasource.yml)
+- Grafana uses Prometheus as the default data source
+- Loki and Promtail collect and forward container logs
 
 ## Stopping the Services
 
-To stop all containers:
+To stop all running containers:
 
 ```bash
 docker compose down
@@ -153,5 +160,5 @@ docker compose down -v
 ## Notes
 
 - The frontend communicates with the backend through the Nginx reverse proxy.
-- The backend waits for the MySQL database to become ready before starting.
+- The backend waits for MySQL to become ready before starting.
 - Default database credentials are configured in [docker-compose.yml](docker-compose.yml).
