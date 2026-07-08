@@ -137,6 +137,30 @@ services:
       - "9100:9100"
     networks:
       - public
+  loki:
+    image: grafana/loki:3.0.0
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki-config.yml:/etc/loki/loki-config.yaml:ro
+    command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - public
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./monitoring/promtail-config.yml:/etc/promtail/config.yaml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+
+    command: -config.file=/etc/promtail/config.yaml
+    networks:
+      - public
+    depends_on:
+      - loki
 
 volumes:
   mysql-data:
