@@ -6,10 +6,15 @@ const message = document.getElementById('message');
 async function loadArticles() {
   try {
     const response = await fetch(apiUrl);
-    const articles = await response.json();
+    const result = await response.json();
+    
+    // التعامل مع الـ response الجديد
+    const articles = result.data || result;
+    const source = result.source || 'unknown';
+    
     articlesDiv.innerHTML = '';
 
-    if (!articles.length) {
+    if (!articles || articles.length === 0) {
       articlesDiv.innerHTML = '<p>لا توجد مقالات بعد.</p>';
       return;
     }
@@ -17,10 +22,15 @@ async function loadArticles() {
     articles.forEach((article) => {
       const el = document.createElement('div');
       el.className = 'article';
-      el.innerHTML = `<h3>${article.title}</h3><p>${article.description}</p>`;
+      el.innerHTML = `
+        <h3>${article.title}</h3>
+        <p>${article.description}</p>
+        <small style="color: #666; font-size: 0.85em;">📅 ${new Date(article.created_at).toLocaleDateString('ar-EG')} | 💾 من ${source === 'redis' ? '🔴 Redis (Cache)' : '🟦 MySQL (Database)'}</small>
+      `;
       articlesDiv.appendChild(el);
     });
   } catch (error) {
+    console.error('Error loading articles:', error);
     message.textContent = 'تعذر تحميل المقالات';
   }
 }
@@ -42,10 +52,14 @@ form.addEventListener('submit', async (event) => {
     }
 
     form.reset();
-    message.textContent = 'تمت إضافة المقال بنجاح';
-    loadArticles();
+    message.textContent = '✅ تمت إضافة المقال بنجاح';
+    setTimeout(() => {
+      message.textContent = '';
+      loadArticles();
+    }, 1000);
   } catch (error) {
-    message.textContent = 'تعذر إضافة المقال';
+    console.error('Error creating article:', error);
+    message.textContent = '❌ تعذر إضافة المقال';
   }
 });
 
