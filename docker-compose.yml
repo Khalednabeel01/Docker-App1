@@ -9,7 +9,7 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./certs:/certs:ro"
-      - ./dynamic:/dynamic:ro
+      - "./dynamic:/dynamic:ro"
       - "./letsencrypt:/letsencrypt"
     command:
       # EntryPoints
@@ -31,17 +31,17 @@ services:
       # Let's Encrypt configuration
       - "--certificatesresolvers.le.acme.email=khalednabeel01@gmail.com" # replace with your actual email
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.le.acme.httpchallenge=true"
       - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
-      # Observability 
+      # Observability i
       - "--log.level=INFO"
       - "--accesslog=true"
       - "--metrics.prometheus=true"
-
     labels:
       # Enable self‑routing
       - "traefik.enable=true"
       # Dashboard router
-      - "traefik.http.routers.dashboard.rule=Host(`dashboard.docker.localhost`)"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.khalednabil.work.gd`)"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls=true"
@@ -64,7 +64,7 @@ services:
     ports:
       - "3306:3306"
     cpus: "1.0"
-    mem_limit: 512m  
+    mem_limit: 512m
     volumes:
       - mysql-data:/var/lib/mysql
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -75,7 +75,7 @@ services:
       retries: 10
     networks:
       - private1
-    restart: always 
+    restart: always
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.db.rule=Host(`db.docker.localhost`)"
@@ -102,7 +102,7 @@ services:
       - redis-data:/data
     networks:
       - private1
-    
+
   backend:
     build: ./backend
     logging:
@@ -141,7 +141,7 @@ services:
     restart: on-failure
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`frontend.docker.localhost`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.rule=Host(`khalednabil.work.gd`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
@@ -168,11 +168,11 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`frontend.docker.localhost`)"
+      - "traefik.http.routers.frontend.rule=Host(`khalednabil.work.gd`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls=true"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80" 
-      - "traefik.http.routers.frontend.tls.certresolver=le"   
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.http.routers.frontend.tls.certresolver=le"
       - "traefik.http.routers.frontend.priority=1"
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -183,16 +183,17 @@ services:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
       - /sys:/sys:ro
-      - /var/lib/docker:/var/lib/docker:ro 
+      - /var/lib/docker:/var/lib/docker:ro
     networks:
-      - private3 
+      - private3
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.docker.localhost`)"
+      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.khalednabil.work.gd`)"
       - "traefik.http.routers.cadvisor.entrypoints=websecure"
       - "traefik.http.routers.cadvisor.tls=true"
-      - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"    
+      - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
       - "traefik.http.routers.cadvisor.priority=10"
+      - "traefik.http.routers.cadvisor.tls.certresolver=le"
 
   prometheus:
     image: prom/prometheus:latest
@@ -203,15 +204,15 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml
     networks:
-      - private3 
+      - private3
       - private1
       - private2
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.prometheus.rule=Host(`prometheus.docker.localhost`)"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.khalednabil.work.gd`)"
       - "traefik.http.routers.prometheus.entrypoints=websecure"
       - "traefik.http.routers.prometheus.tls=true"
-      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"    
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
       - "traefik.http.routers.prometheus.priority=20"
 
   grafana:
@@ -231,11 +232,11 @@ services:
       - private3
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.grafana.rule=Host(`grafana.docker.localhost`)"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.khalednabil.work.gd`)"
       - "traefik.http.routers.grafana.entrypoints=websecure"
       - "traefik.http.routers.grafana.tls=true"
-      - "traefik.http.services.grafana.loadbalancer.server.port=3000"    
-      - "traefik.http.routers.grafana.priority=30"  
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+      - "traefik.http.routers.grafana.priority=30"
   nodeExporter:
     image: prom/node-exporter:latest
     container_name: node_exporter
@@ -245,7 +246,7 @@ services:
       - private3
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.nodeExporter.rule=Host(`node-exporter.docker.localhost`)"
+      - "traefik.http.routers.nodeExporter.rule=Host(`node-exporter.khalednabil.work.gd`)"
       - "traefik.http.routers.nodeExporter.entrypoints=websecure"
       - "traefik.http.routers.nodeExporter.tls=true"
       - "traefik.http.services.nodeExporter.loadbalancer.server.port=9100"
@@ -262,11 +263,11 @@ services:
       - private3
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.loki.rule=Host(`loki.docker.localhost`)"
+      - "traefik.http.routers.loki.rule=Host(`loki.khalednabil.work.gd`)"
       - "traefik.http.routers.loki.entrypoints=websecure"
       - "traefik.http.routers.loki.tls=true"
       - "traefik.http.services.loki.loadbalancer.server.port=3100"
-      - "traefik.http.routers.loki.priority=50"  
+      - "traefik.http.routers.loki.priority=50"
   promtail:
     image: grafana/promtail:latest
     container_name: promtail
@@ -276,11 +277,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.promtail.rule=Host(`promtail.docker.localhost`)"
+      - "traefik.http.routers.promtail.rule=Host(`promtail.khalednabil.work.gd`)"
       - "traefik.http.routers.promtail.entrypoints=websecure"
       - "traefik.http.routers.promtail.tls=true"
       - "traefik.http.services.promtail.loadbalancer.server.port=9080"
-      - "traefik.http.routers.promtail.priority=60"  
+      - "traefik.http.routers.promtail.priority=60"
 
 
     command: -config.file=/etc/promtail/config.yaml
@@ -298,14 +299,14 @@ services:
     ports:
         - '9093:9093'
     networks:
-      - private3    
+      - private3
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.docker.localhost`)"
+      - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.khalednabil.work.gd`)"
       - "traefik.http.routers.alertmanager.entrypoints=websecure"
       - "traefik.http.routers.alertmanager.tls=true"
       - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
-      - "traefik.http.routers.alertmanager.priority=70"  
+      - "traefik.http.routers.alertmanager.priority=70"
 volumes:
   mysql-data:
   grafana-data:
@@ -319,3 +320,4 @@ networks:
     name: private2
   private3:
     name: private3
+                           
