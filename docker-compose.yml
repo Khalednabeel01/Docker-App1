@@ -76,12 +76,25 @@ services:
     networks:
       - private1
     restart: always
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.db.rule=Host(`db.docker.localhost`)"
-      - "traefik.http.routers.db.entrypoints=websecure"
-      - "traefik.http.routers.db.tls=true"
-      - "traefik.http.routers.db.tls.certresolver=le"
+  backup-db:
+    image: fradelg/mysql-cron-backup
+    restart: unless-stopped
+    user: "0:3004"
+    depends_on:
+      - db
+    networks:
+      - private1
+    volumes:
+      - backup:/backup
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_USER: user
+      MYSQL_PASS: password
+      MAX_BACKUPS: 15
+      INIT_BACKUP: 1
+      CRON_TIME: 0 * * * *
+      GZIP_LEVEL: 9    
   redis-cache:
     image: redis:7.4-alpine
     container_name: redis_cache
@@ -144,8 +157,8 @@ services:
       - "traefik.http.routers.backend.rule=Host(`khalednabil.work.gd`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"
-      - "traefik.http.services.backend.loadbalancer.server.port=3000"
       - "traefik.http.routers.backend.tls.certresolver=le"
+      - "traefik.http.services.backend.loadbalancer.server.port=3000"
       - "traefik.http.routers.backend.priority=100"
   frontend:
     build: ./frontend
@@ -171,8 +184,8 @@ services:
       - "traefik.http.routers.frontend.rule=Host(`khalednabil.work.gd`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls=true"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.frontend.tls.certresolver=le"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
       - "traefik.http.routers.frontend.priority=1"
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -186,20 +199,11 @@ services:
       - /var/lib/docker:/var/lib/docker:ro
     networks:
       - private3
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.cadvisor.rule=Host(`cadvisor.khalednabil.work.gd`)"
-      - "traefik.http.routers.cadvisor.entrypoints=websecure"
-      - "traefik.http.routers.cadvisor.tls=true"
-      - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
-      - "traefik.http.routers.cadvisor.priority=10"
-      - "traefik.http.routers.cadvisor.tls.certresolver=le"
-
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./prometheus/alert.rules.yml:/etc/prometheus/alert.rules.yml
@@ -212,14 +216,14 @@ services:
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.khalednabil.work.gd`)"
       - "traefik.http.routers.prometheus.entrypoints=websecure"
       - "traefik.http.routers.prometheus.tls=true"
+      - "traefik.http.routers.prometheus.tls.certresolver=le"
       - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
       - "traefik.http.routers.prometheus.priority=20"
-
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
-    ports:
-      - "3001:3000"
+    expose:
+      - "3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
@@ -235,6 +239,7 @@ services:
       - "traefik.http.routers.grafana.rule=Host(`grafana.khalednabil.work.gd`)"
       - "traefik.http.routers.grafana.entrypoints=websecure"
       - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.tls.certresolver=le"
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
       - "traefik.http.routers.grafana.priority=30"
   nodeExporter:
@@ -244,13 +249,6 @@ services:
       - "9100:9100"
     networks:
       - private3
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.nodeExporter.rule=Host(`node-exporter.khalednabil.work.gd`)"
-      - "traefik.http.routers.nodeExporter.entrypoints=websecure"
-      - "traefik.http.routers.nodeExporter.tls=true"
-      - "traefik.http.services.nodeExporter.loadbalancer.server.port=9100"
-      - "traefik.http.routers.nodeExporter.priority=40"
   loki:
     image: grafana/loki:3.0.0
     container_name: loki
@@ -261,13 +259,6 @@ services:
     command: -config.file=/etc/loki/loki-config.yaml
     networks:
       - private3
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.loki.rule=Host(`loki.khalednabil.work.gd`)"
-      - "traefik.http.routers.loki.entrypoints=websecure"
-      - "traefik.http.routers.loki.tls=true"
-      - "traefik.http.services.loki.loadbalancer.server.port=3100"
-      - "traefik.http.routers.loki.priority=50"
   promtail:
     image: grafana/promtail:latest
     container_name: promtail
@@ -275,15 +266,6 @@ services:
       - ./monitoring/promtail-config.yml:/etc/promtail/config.yaml:ro
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.promtail.rule=Host(`promtail.khalednabil.work.gd`)"
-      - "traefik.http.routers.promtail.entrypoints=websecure"
-      - "traefik.http.routers.promtail.tls=true"
-      - "traefik.http.services.promtail.loadbalancer.server.port=9080"
-      - "traefik.http.routers.promtail.priority=60"
-
-
     command: -config.file=/etc/promtail/config.yaml
     networks:
       - private3
@@ -296,8 +278,8 @@ services:
           - ./monitoring/alertmanager.yml:/alertmanager.yml
     command:
         - '--config.file=/alertmanager.yml'
-    ports:
-        - '9093:9093'
+    expose:
+        - "9093"
     networks:
       - private3
     labels:
@@ -305,12 +287,14 @@ services:
       - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.khalednabil.work.gd`)"
       - "traefik.http.routers.alertmanager.entrypoints=websecure"
       - "traefik.http.routers.alertmanager.tls=true"
+      - "traefik.http.routers.alertmanager.tls.certresolver=le"
       - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
       - "traefik.http.routers.alertmanager.priority=70"
 volumes:
   mysql-data:
   grafana-data:
   redis-data:
+  backup:
 networks:
   public:
     name: public
