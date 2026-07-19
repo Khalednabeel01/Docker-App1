@@ -20,7 +20,8 @@ services:
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls=true"
       # Attach the static configuration tls.yaml file that contains the tls configuration settings
-      - "--providers.file.filename=/dynamic/tls.yaml"
+      - "--providers.file.directory=/dynamic"
+      - "--providers.file.watch=true"
       # API and Dashboard
       - "--api.insecure=false"
       - "--api.dashboard=true"
