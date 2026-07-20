@@ -41,7 +41,7 @@ services:
       # Enable self‑routing
       - "traefik.enable=true"
       # Dashboard router
-      - "traefik.http.routers.dashboard.rule=Host(`dashboard.khalednabil.work.gd`)"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.khaledns.work.gd`)"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls=true"
@@ -114,8 +114,7 @@ services:
     volumes:
       - redis-data:/data
     networks:
-      - private1
-    db: 0  
+      - private1  
 
   backend:
     build: ./backend
@@ -155,7 +154,7 @@ services:
     restart: on-failure
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`khalednabil.work.gd`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.rule=Host(`khaledns.work.gd`) && PathPrefix(`/api`)"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=le"
@@ -182,7 +181,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`khalednabil.work.gd`)"
+      - "traefik.http.routers.frontend.rule=Host(`khaledns.work.gd`)"
       - "traefik.http.routers.frontend.entrypoints=websecure"
       - "traefik.http.routers.frontend.tls=true"
       - "traefik.http.routers.frontend.tls.certresolver=le"
@@ -214,7 +213,7 @@ services:
       - private2
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.prometheus.rule=Host(`prometheus.khalednabil.work.gd`)"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.khaledns.work.gd`)"
       - "traefik.http.routers.prometheus.entrypoints=websecure"
       - "traefik.http.routers.prometheus.tls=true"
       - "traefik.http.routers.prometheus.tls.certresolver=le"
@@ -237,7 +236,7 @@ services:
       - private3
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.grafana.rule=Host(`grafana.khalednabil.work.gd`)"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.khaledns.work.gd`)"
       - "traefik.http.routers.grafana.entrypoints=websecure"
       - "traefik.http.routers.grafana.tls=true"
       - "traefik.http.routers.grafana.tls.certresolver=le"
@@ -285,7 +284,7 @@ services:
       - private3
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.khalednabil.work.gd`)"
+      - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.khaledns.work.gd`)"
       - "traefik.http.routers.alertmanager.entrypoints=websecure"
       - "traefik.http.routers.alertmanager.tls=true"
       - "traefik.http.routers.alertmanager.tls.certresolver=le"
