@@ -5,7 +5,6 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      #- "8080:8080" # Traefik dashboard
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./certs:/certs:ro"
@@ -94,7 +93,7 @@ services:
       MYSQL_PASS: password
       MAX_BACKUPS: 15
       INIT_BACKUP: 1
-      CRON_TIME: 0 * * * *
+      CRON_TIME: 0 0 * * *
       GZIP_LEVEL: 9    
   redis-cache:
     image: redis:7.4-alpine
@@ -116,6 +115,7 @@ services:
       - redis-data:/data
     networks:
       - private1
+    db: 0  
 
   backend:
     build: ./backend

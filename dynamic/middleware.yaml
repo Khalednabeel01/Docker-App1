@@ -1,0 +1,19 @@
+# Here, an average of 100 requests per second is allowed.
+# In addition, a burst of 200 requests is allowed.
+# Redis distributed rate limiting is configured with all available options.
+http:
+  middlewares:
+    test-ratelimit:
+      rateLimit:
+        average: 100
+        period: 1s
+        burst: 200
+        redis:
+          endpoints:
+            - "redis-cache:6379"
+          db: 1
+          poolSize: 10
+          readTimeout: 3s
+          writeTimeout: 3s
+          dialTimeout: 5s
+       
