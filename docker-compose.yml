@@ -299,7 +299,7 @@ services:
     restart: unless-stopped
     command:
     - --alertmanager.url=http://alertmanager:9093
-    - --telegram.token=YOUR_BOT_TOKEN
+    - --telegram.token=8740043255:AAG4Plhy3jHJuInbgsk5-jObJEChQp7XRU0
     - --telegram.admin=6466183763
     depends_on:
       - alertmanager
