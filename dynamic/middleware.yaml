@@ -5,15 +5,18 @@ http:
   middlewares:
     test-ratelimit:
       rateLimit:
-        average: 100
+        average: 10
         period: 1s
-        burst: 200
-        redis:
-          endpoints:
-            - "redis-cache:6379"
-          db: 1
-          poolSize: 10
-          readTimeout: 3s
-          writeTimeout: 3s
-          dialTimeout: 5s
-       
+        burst: 20
+        
+    my-traefik-api-key-middleware:    
+        plugin:
+          traefik-api-key-middleware:
+            authenticationHeader: true
+            authenticationheaderName: X-API-KEY
+            bearerHeader: true
+            bearerHeaderName: Authorization
+            removeHeadersOnSuccess: true
+            keys:
+              - some-api-key  
+          

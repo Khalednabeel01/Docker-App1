@@ -7,5 +7,45 @@ groups:
     labels:
       severity: "critical"
     annotations:
-      summary: "Endpoint {{ $labels.instance }} down"
-      description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minutes."
+      summary: "Instance Down"
+      description: "{{ $labels.instance }} is unreachable."
+
+  - alert: HighMemoryUsage
+    expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "High Memory Usage"
+      description: "Memory usage on {{ $labels.instance }} is above 85%."
+        
+  - alert: SlowAPI
+    expr: |
+      histogram_quantile(
+        0.95,
+        sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+      ) > 0.5
+    for: 5m
+    labels:
+      severity: warning
+    annotations:
+      summary: "Slow API"
+      description: "API p95 response time has exceeded 500 ms."
+
+  - alert: MySQLHighConnections
+    expr: (mysql_global_status_threads_connected / mysql_global_variables_max_connections) * 100 > 85
+    for: 5m
+    labels:
+      severity: critical
+    annotations:
+      summary: "MySQL Connections High"
+      description: "MySQL on {{ $labels.instance }} is using more than 85% of its available connections."
+
+  - alert: SSLCertificateExpiring
+    expr: (probe_ssl_earliest_cert_expiry - time()) < 30 * 24 * 60 * 60
+    for: 1h
+    labels:
+      severity: warning
+    annotations:
+      summary: "SSL Certificate Expiring Soon"
+      description: "SSL certificate for {{ $labels.instance }} will expire within the next 30 days."

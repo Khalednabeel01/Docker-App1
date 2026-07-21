@@ -9,7 +9,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./certs:/certs:ro"
       - "./dynamic:/dynamic:ro"
-      - "./letsencrypt:/letsencrypt"
+      - "./letsencrypt:/letsencrypt"  
     command:
       # EntryPoints
       - "--entrypoints.web.address=:80"
@@ -27,9 +27,8 @@ services:
       # Docker Provider
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=private2"
       # Let's Encrypt configuration
-      - "--certificatesresolvers.le.acme.email=khalednabeel01@gmail.com" # replace with your actual email
+      - "--certificatesresolvers.le.acme.email=khalednabeel01@gmail.com" 
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.le.acme.httpchallenge=true"
       - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
@@ -41,11 +40,13 @@ services:
       # Enable self‑routing
       - "traefik.enable=true"
       # Dashboard router
-      - "traefik.http.routers.dashboard.rule=Host(`dashboard.khaledns.work.gd`)"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.khaledns.work.gd`)" 
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.tls.certresolver=le"
+      - "traefik.http.routers.dashboard.middlewares=test-ratelimit@file"
+
     networks:
       - public
       - private1
@@ -159,7 +160,9 @@ services:
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=le"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.backend.middlewares=test-ratelimit@file"
       - "traefik.http.routers.backend.priority=100"
+      
   frontend:
     build: ./frontend
     logging:
@@ -169,13 +172,13 @@ services:
       - backend
     expose:
       - "80"
-    #cpus: "0.25"
-    #mem_limit: 128m
-    #healthcheck:
-      #test: ["CMD", "curl", "-f", "http://localhost:80"]
-      #interval: 10s
-      #timeout: 5s
-      #retries: 10
+    cpus: "0.25"
+    mem_limit: 128m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     networks:
       - private2
     restart: unless-stopped
@@ -290,6 +293,21 @@ services:
       - "traefik.http.routers.alertmanager.tls.certresolver=le"
       - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
       - "traefik.http.routers.alertmanager.priority=70"
+  telegrambot:
+    image: metalmatze/alertmanager-bot:0.4.3
+    container_name: telegrambot
+    restart: unless-stopped
+    command:
+    - --alertmanager.url=http://alertmanager:9093
+    - --telegram.token=YOUR_BOT_TOKEN
+    - --telegram.admin=6466183763
+    depends_on:
+      - alertmanager
+    expose:
+      - "8080"
+
+  networks:
+    - private3    
 volumes:
   mysql-data:
   grafana-data:
