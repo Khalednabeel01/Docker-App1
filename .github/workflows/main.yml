@@ -31,7 +31,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./backend
-          file: ./backend/Dockerfile
           push: false
           tags: app-backend:pr-test
 
@@ -40,18 +39,14 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./backend
-          file: ./backend/Dockerfile
           push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/app-backend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/app-backend:v${{ github.run_number }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/app-backend:v${{ github.run_number }}
 
       - name: Build frontend image for pull request
         if: github.event_name == 'pull_request'
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
-          file: ./frontend/Dockerfile
           push: false
           tags: app-frontend:pr-test
 
@@ -60,8 +55,5 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
-          file: ./frontend/Dockerfile
           push: true
-          tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/app-frontend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/app-frontend:v${{ github.run_number }}
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/app-frontend:v${{ github.run_number }}

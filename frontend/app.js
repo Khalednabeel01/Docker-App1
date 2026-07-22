@@ -1,11 +1,16 @@
 const apiUrl = '/api/articles';
+const apiKey = 'some-api-key'; // نفس المفتاح في middleware.yaml
 const form = document.getElementById('article-form');
 const articlesDiv = document.getElementById('articles');
 const message = document.getElementById('message');
 
 async function loadArticles() {
   try {
-    const response = await fetch(apiUrl);
+    const response = await fetch(apiUrl, {
+      headers: {
+        'X-API-KEY': apiKey
+      }
+    });
     const result = await response.json();
     
     // التعامل مع الـ response الجديد
@@ -43,7 +48,10 @@ form.addEventListener('submit', async (event) => {
   try {
     const response = await fetch(apiUrl, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-KEY': apiKey
+      },
       body: JSON.stringify({ title, description })
     });
 

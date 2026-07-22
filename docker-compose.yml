@@ -32,6 +32,9 @@ services:
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.le.acme.httpchallenge=true"
       - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+      # Dowload plugin
+      - "--experimental.plugins.traefik-api-key-middleware.modulename=github.com/dtomlinson91/traefik-api-key-middleware"
+      - "--experimental.plugins.traefik-api-key-middleware.version=v0.1.2"
       # Observability i
       - "--log.level=INFO"
       - "--accesslog=true"
@@ -46,7 +49,6 @@ services:
       - "traefik.http.routers.dashboard.tls=true"
       - "traefik.http.routers.dashboard.tls.certresolver=le"
       - "traefik.http.routers.dashboard.middlewares=test-ratelimit@file"
-
     networks:
       - public
       - private1
@@ -160,9 +162,8 @@ services:
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=le"
       - "traefik.http.services.backend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.backend.middlewares=test-ratelimit@file"
+      - "traefik.http.routers.backend.middlewares=test-ratelimit@file,my-traefik-api-key-middleware@file"
       - "traefik.http.routers.backend.priority=100"
-      
   frontend:
     build: ./frontend
     logging:
