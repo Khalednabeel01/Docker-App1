@@ -7,5 +7,6 @@ route:
 receivers:
   - name: telegram
     webhook_configs:
-      - url: "http://telegram-bot:8080"
+      - url: "http://telegrambot:8080"
         send_resolved: true
+      

@@ -301,13 +301,13 @@ services:
     - --alertmanager.url=http://alertmanager:9093
     - --telegram.token=8740043255:AAG4Plhy3jHJuInbgsk5-jObJEChQp7XRU0
     - --telegram.admin=6466183763
+    - --store=bolt
     depends_on:
       - alertmanager
     expose:
       - "8080"
-
-  networks:
-    - private3    
+    networks:
+      - private3    
 volumes:
   mysql-data:
   grafana-data:
