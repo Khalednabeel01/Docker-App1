@@ -44,7 +44,7 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/app-backend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/app-backend
+            ${{ secrets.DOCKERHUB_USERNAME }}/app-backend:v${{ github.run_number }}
 
       - name: Build frontend image for pull request
         if: github.event_name == 'pull_request'
@@ -64,4 +64,4 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/app-frontend:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/app-frontend:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/app-frontend:v${{ github.run_number }}
