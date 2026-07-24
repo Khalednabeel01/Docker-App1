@@ -32,7 +32,7 @@ services:
       - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.le.acme.httpchallenge=true"
       - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
-      # Dowload plugin
+      # Download plugin
       - "--experimental.plugins.traefik-api-key-middleware.modulename=github.com/dtomlinson91/traefik-api-key-middleware"
       - "--experimental.plugins.traefik-api-key-middleware.version=v0.1.2"
       # Observability i
@@ -118,7 +118,6 @@ services:
       - redis-data:/data
     networks:
       - private1  
-
   backend:
     build: ./backend
     logging:
@@ -308,7 +307,17 @@ services:
     expose:
       - "8080"
     networks:
-      - private3    
+      - private3   
+  k6:
+    image: grafana/k6:latest
+    container_name: k6
+    profiles:
+      - testing
+    volumes:
+      - ./k6:/scripts
+    networks:
+      - public
+
 volumes:
   mysql-data:
   grafana-data:
