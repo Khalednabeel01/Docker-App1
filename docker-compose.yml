@@ -101,7 +101,7 @@ services:
     networks:
       - private1
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -uroot -proot123"]
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -ppassword"]
       interval: 10s
       timeout: 5s
       retries: 5  

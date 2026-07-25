@@ -12,10 +12,6 @@ enforce_gtid_consistency=ON
 
 log_replica_updates=ON
 
-read_only=ON
-
-super_read_only=ON
-
 sync_binlog=1
 
 innodb_flush_log_at_trx_commit=1
