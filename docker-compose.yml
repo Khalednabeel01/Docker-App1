@@ -55,10 +55,11 @@ services:
       - private2
       - private3
   db:
-    image: mysql:8.0
+    image: mysql:8.4
     logging:
       driver: "local"
     container_name: container_db
+    hostname: mysql-primary
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: db
@@ -71,6 +72,7 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./mysql/primary/primary.cnf:/etc/mysql/conf.d/primary.cnf:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
       interval: 10s
@@ -79,6 +81,59 @@ services:
     networks:
       - private1
     restart: always
+  mysql-replica:
+    image: mysql:8.4
+    container_name: mysql-replica
+    hostname: mysql-replica
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+    ports:
+      - "3307:3306"
+    volumes:
+      - replica-data:/var/lib/mysql
+      - ./mysql/replica/replica.cnf:/etc/mysql/conf.d/replica.cnf:ro
+      - ./mysql/replica/replica.sql:/scripts/replica.sql:ro
+      - ./mysql/replica/replica-init.sh:/scripts/replica-init.sh:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - private1
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -proot123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5  
+  proxysql:
+    image: proxysql/proxysql:3.0.2
+    container_name: proxysql
+    hostname: proxysql
+    restart: unless-stopped
+    ports:
+      - "6032:6032"  
+      - "6033:6033"  
+    volumes:
+      - proxysql-data:/var/lib/proxysql
+    depends_on:
+      db:
+        condition: service_healthy
+      mysql-replica:
+        condition: service_healthy
+    networks:
+      - private1
+  replication-init:
+    build:
+      context: ./replication-init
+    container_name: replication-init
+    depends_on:
+      db:
+        condition: service_healthy
+      mysql-replica:
+        condition: service_healthy
+    networks:
+      - private1
+    restart: "no"    
   backup-db:
     image: fradelg/mysql-cron-backup
     restart: unless-stopped
@@ -322,6 +377,8 @@ volumes:
   mysql-data:
   grafana-data:
   redis-data:
+  replica-data:
+  proxysql-data:
   backup:
 networks:
   public:
