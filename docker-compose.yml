@@ -87,7 +87,7 @@ services:
     hostname: mysql-replica
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_ROOT_PASSWORD: password
     ports:
       - "3307:3306"
     volumes:
