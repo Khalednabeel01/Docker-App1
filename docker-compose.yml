@@ -115,6 +115,9 @@ services:
       - "6033:6033"  
     volumes:
       - proxysql-data:/var/lib/proxysql
+      - ./proxysql/users.sql:/scripts/users.sql:ro
+      - ./proxysql/init.sh:/scripts/init.sh:ro
+      - ./proxysql/init_servers.sql:/docker-entrypoint-initdb.d/init_servers.sql:ro
     depends_on:
       db:
         condition: service_healthy
