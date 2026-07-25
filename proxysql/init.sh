@@ -1,15 +1,16 @@
 #!/bin/sh
 
-until mysqladmin ping -h 127.0.0.1 -P6032 -uadmin -padmin --silent
+echo "Waiting for ProxySQL..."
+
+until mysqladmin ping -h127.0.0.1 -P6032 -uadmin -padmin --silent
 do
     sleep 2
 done
 
-mysql \
-    -u admin \
-    -padmin \
-    -h 127.0.0.1 \
-    -P6032 \
-    < /scripts/users.sql
+echo "Configuring mysql_servers..."
+mysql -uadmin -padmin -h127.0.0.1 -P6032 < /scripts/init_servers.sql
 
-echo "ProxySQL users configured successfully."
+echo "Configuring mysql_users..."
+mysql -uadmin -padmin -h127.0.0.1 -P6032 < /scripts/users.sql
+
+echo "ProxySQL configured successfully."
