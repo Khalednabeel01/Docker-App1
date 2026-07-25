@@ -181,7 +181,7 @@ services:
         max-size: "10m"
         max-file: "3"
     environment:
-      DB_HOST: db
+      DB_HOST: proxysql
       DB_PORT: 3306
       DB_USER: user
       DB_PASSWORD: password
@@ -191,8 +191,8 @@ services:
       REDIS_PORT: 6379
 
     depends_on:
-      db:
-        condition: service_healthy
+      proxysql:
+        condition: service_started
       redis-cache:
         condition: service_healthy
     expose:
