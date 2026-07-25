@@ -118,6 +118,7 @@ services:
       - ./proxysql/users.sql:/scripts/users.sql:ro
       - ./proxysql/init.sh:/scripts/init.sh:ro
       - ./proxysql/init_servers.sql:/docker-entrypoint-initdb.d/init_servers.sql:ro 
+    entrypoint: ["/bin/sh", "/scripts/init.sh"]  
     depends_on:
       db:
         condition: service_healthy
@@ -149,7 +150,7 @@ services:
       - backup:/backup
     environment:
       MYSQL_HOST: db
-      MYSQL_PORT: 3306
+      MYSQL_PORT: 6033
       MYSQL_USER: user
       MYSQL_PASS: password
       MAX_BACKUPS: 15
