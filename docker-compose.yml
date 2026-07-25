@@ -116,8 +116,8 @@ services:
     volumes:
       - proxysql-data:/var/lib/proxysql
       - ./proxysql/users.sql:/scripts/users.sql:ro
+      - ./proxysql/init_servers.sql:/scripts/init_servers.sql:ro
       - ./proxysql/init.sh:/scripts/init.sh:ro
-      - ./proxysql/init_servers.sql:/docker-entrypoint-initdb.d/init_servers.sql:ro 
     entrypoint: ["/bin/sh", "/scripts/init.sh"]  
     depends_on:
       db:
@@ -150,7 +150,7 @@ services:
       - backup:/backup
     environment:
       MYSQL_HOST: db
-      MYSQL_PORT: 6033
+      MYSQL_PORT: 3306
       MYSQL_USER: user
       MYSQL_PASS: password
       MAX_BACKUPS: 15
@@ -186,7 +186,7 @@ services:
         max-file: "3"
     environment:
       DB_HOST: proxysql
-      DB_PORT: 3306
+      DB_PORT: 6033
       DB_USER: user
       DB_PASSWORD: password
       DB_NAME: db

@@ -1,5 +1,7 @@
 #!/bin/sh
 
+proxysql -f &
+
 echo "Waiting for ProxySQL..."
 
 until mysqladmin ping -h127.0.0.1 -P6032 -uadmin -padmin --silent
@@ -7,10 +9,12 @@ do
     sleep 2
 done
 
-echo "Configuring mysql_servers..."
+echo "Loading servers..."
 mysql -uadmin -padmin -h127.0.0.1 -P6032 < /scripts/init_servers.sql
 
-echo "Configuring mysql_users..."
+echo "Loading users..."
 mysql -uadmin -padmin -h127.0.0.1 -P6032 < /scripts/users.sql
 
-echo "ProxySQL configured successfully."
+echo "Done."
+
+wait
