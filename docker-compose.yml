@@ -118,6 +118,7 @@ services:
       - ./proxysql/users.sql:/scripts/users.sql:ro
       - ./proxysql/init_servers.sql:/scripts/init_servers.sql:ro
       - ./proxysql/init.sh:/scripts/init.sh:ro
+      - ./proxysql/query_reles.sql:scripts/query_rules.sql:ro
     entrypoint: ["/bin/sh", "/scripts/init.sh"]  
     depends_on:
       db:
@@ -127,9 +128,11 @@ services:
     networks:
       - private1
   replication-init:
-    build:
-      context: ./replication-init
+    image: mysql:8.4
     container_name: replication-init
+    volumes:
+    - ./wait-and-configure.sh:/scripts/wait-and-configure.sh:ro
+    entrypoint: [ "/bin/sh", "/scripts/wait-and-configure.sh"]
     depends_on:
       db:
         condition: service_healthy
