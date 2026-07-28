@@ -118,7 +118,7 @@ services:
       - ./proxysql/users.sql:/scripts/users.sql:ro
       - ./proxysql/init_servers.sql:/scripts/init_servers.sql:ro
       - ./proxysql/init.sh:/scripts/init.sh:ro
-      - ./proxysql/query_reles.sql:scripts/query_rules.sql:ro
+      - ./proxysql/query_rules.sql:scripts/query_rules.sql:ro
     entrypoint: ["/bin/sh", "/scripts/init.sh"]  
     depends_on:
       db:
