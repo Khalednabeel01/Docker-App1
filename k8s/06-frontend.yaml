@@ -16,7 +16,7 @@ metadata:
   name: frontend
   namespace: docker-app1
 spec:
-  replicas: 2
+  replicas: 5
   selector:
     matchLabels:
       app: frontend
